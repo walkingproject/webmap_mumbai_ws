@@ -38,6 +38,19 @@
 
 
     <body>
+        <div id="download-panel">
+            <select id="categorySelect"></select>
+            <select id="formatSelect">
+                <option value="geojson">GeoJSON</option>
+                <option value="kml">KML</option>
+            </select>
+            <button id="downloadBtn">Download</button>
+            <div id="downloadStatus" style="font-size:12px;margin-top:6px;">            
+            </div>
+        </div>
+        <div id="gpkg-download" style="position:absolute;top:130px;right:10px;background:white;padding:8px;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,0.25);z-index:9999;font-family:sans-serif;">
+            <a href="downloads/map_gpkg.zip" download>Download All GPKG + QML</a>
+        </div>
         <div id="map">
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
