@@ -48,9 +48,6 @@
             <div id="downloadStatus" style="font-size:12px;margin-top:6px;">            
             </div>
         </div>
-        <div id="gpkg-download" style="position:absolute;top:130px;right:10px;background:white;padding:8px;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,0.25);z-index:9999;font-family:sans-serif;">
-            <a href="downloads/map_gpkg.zip" download>Download All GPKG + QML</a>
-        </div>
         <div id="map">
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
@@ -222,71 +219,117 @@
 
         var statusDiv = document.getElementById('downloadStatus');
 
-        // Download function
         async function downloadCategory(category, format) {
-        var layers = categories[category];
-        var zip = new JSZip();
-        var missing = [];
-
-        // Disable the download button during processing
-        var downloadBtn = document.getElementById('downloadBtn');
-        downloadBtn.disabled = true;
-        statusDiv.innerText = "Preparing download...";
-
-        for (let name of layers) {
-            statusDiv.innerText = "Processing: " + name;
-            var varName = "json_" + name;
-            var data = window[varName];
-
-            // Check if data exists and is valid
-            if (!data || !data.features || data.features.length === 0) {
-                missing.push(name);
-                continue;
-            }
-
-            if (format === 'geojson') {
-                zip.file(name + ".geojson", JSON.stringify(data));
-            } else {
-                try {
-                    var kml = tokml(data);
-                    zip.file(name + ".kml", kml);
-                } catch (e) {
-                    console.error("Failed to convert " + name + " to KML:", e);
-                    missing.push(name);
+            try {
+                const layers = categories[category];
+                const zip = new JSZip();
+                const missing = [];
+                const downloadBtn = document.getElementById('downloadBtn');
+                
+                // UI feedback
+                downloadBtn.disabled = true;
+                statusDiv.innerText = "Preparing download...";
+                statusDiv.style.color = "black";
+                
+                // Process each layer
+                for (const name of layers) {
+                    statusDiv.innerText = `Processing: ${name}`;
+                    const varName = `json_${name}`;
+                    
+                    // Check if data exists in global scope
+                    if (!window[varName]) {
+                        console.error(`Data not found: ${varName}`);
+                        missing.push(name);
+                        continue;
+                    }
+                    
+                    const data = window[varName];
+                    
+                    // Validate GeoJSON structure
+                    if (!data.type || data.type !== 'FeatureCollection') {
+                        console.error(`Invalid GeoJSON structure in ${name}`);
+                        missing.push(name);
+                        continue;
+                    }
+                    
+                    try {
+                        if (format === 'geojson') {
+                            // Create GeoJSON file
+                            zip.file(`${name}.geojson`, JSON.stringify(data, null, 2));
+                        } else {
+                            // Create KML file
+                            const kml = tokml(data);
+                            if (!kml) throw new Error("Empty KML output");
+                            zip.file(`${name}.kml`, kml);
+                        }
+                    } catch (e) {
+                        console.error(`Failed to process ${name}:`, e);
+                        missing.push(name);
+                    }
+                    
+                    // Small delay to keep UI responsive
+                    await new Promise(r => setTimeout(r, 10));
                 }
+
+                // Add README if any layers failed
+                if (missing.length > 0) {
+                    zip.file("README.txt", `The following layers could not be processed:\n${missing.join('\n')}`);
+                }
+
+                // Generate ZIP file
+                statusDiv.innerText = "Creating ZIP archive...";
+                const blob = await zip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE'
+                });
+
+                // Create download link
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${category}_${format}_${new Date().toISOString().slice(0,10)}.zip`;
+                
+                // Required for Firefox
+                document.body.appendChild(link);
+                link.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                    statusDiv.innerText = `Download complete!`;
+                    statusDiv.style.color = "green";
+                    downloadBtn.disabled = false;
+                }, 100);
+
+            } catch (error) {
+                console.error('Download failed:', error);
+                statusDiv.innerText = `Error: ${error.message}`;
+                statusDiv.style.color = "red";
+                document.getElementById('downloadBtn').disabled = false;
             }
-            await new Promise(r => setTimeout(r, 10)); // Small delay to avoid UI freeze
         }
 
-        if (missing.length) {
-            zip.file("README.txt", "The following layers could not be processed:\n" + missing.join("\n"));
-        }
-
-        statusDiv.innerText = "Compressing...";
-        var blob = await zip.generateAsync({ type: "blob" });
-
-        // Create download link
-        var link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `${category}_${format}_${new Date().toISOString().slice(0, 10)}.zip`;
-        document.body.appendChild(link);
-        link.click();
-
-        // Clean up
-        setTimeout(() => {
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-            statusDiv.innerText = "Download ready";
-            downloadBtn.disabled = false;
-        }, 100);
-    }
-
-        // Bind
+        // 3. Initialize the download button
         document.getElementById('downloadBtn').addEventListener('click', function() {
-        var cat = document.getElementById('categorySelect').value;
-        var fmt = document.getElementById('formatSelect').value;
-        downloadCategory(cat, fmt);
+            const cat = document.getElementById('categorySelect').value;
+            const fmt = document.getElementById('formatSelect').value;
+            
+            if (!cat) {
+                statusDiv.innerText = "Please select a category";
+                statusDiv.style.color = "red";
+                return;
+            }
+            
+            downloadCategory(cat, fmt);
         });
+
+        // 4. Verify data loading (debug check)
+        console.log("Sample data verification:", {
+            taxi_data: window.json_mum_ws_polygon_transport_taxi_54,
+            has_features: window.json_mum_ws_polygon_transport_taxi_54?.features?.length > 0
+        });
+
+        
 
         var highlightLayer;
         function highlightFeature(e) {
