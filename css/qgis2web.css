@@ -201,25 +201,43 @@
             z-index: 9999;
             font-family: Arial, sans-serif;
             color: #4c4c4c;
+            max-width: 250px; /* Prevent too wide panels */
         }
 
         .download-panel h3 {
-            margin: 0 0 5px;
+            margin: 0 0 10px 0;
             font-size: 14px;
+            text-align: center;
+        }
+
+        .download-panel select {
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
         }
 
         .download-panel button {
             display: block;
             width: 100%;
-            margin-bottom: 5px;
-            padding: 6px;
+            margin: 8px 0 5px 0;
+            padding: 8px;
             background: #4c4c4c;
             color: #fff;
             border: none;
             cursor: pointer;
             border-radius: 3px;
+            font-weight: bold;
         }
 
         .download-panel button:hover {
             background: #333;
+        }
+
+        #downloadStatus {
+            font-size: 12px;
+            margin-top: 8px;
+            min-height: 14px;
+            color: #333;
         }
