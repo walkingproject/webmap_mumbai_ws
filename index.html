@@ -22,9 +22,26 @@
         </style>
         <title></title>
     </head>
+    <div id="download-panel">
+        <select id="categorySelect"></select>
+        <select id="formatSelect">
+            <option value="geojson">GeoJSON</option>
+            <option value="kml">KML</option>
+        </select>
+        <button id="downloadBtn">Download</button>
+        <div id="downloadStatus" style="font-size:12px;margin-top:6px;">            
+        </div>
+    </div>
+    <div id="gpkg-download" style="position:absolute;top:130px;right:10px;background:white;padding:8px;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,0.25);z-index:9999;font-family:sans-serif;">
+        <a href="downloads/map_gpkg.zip" download>Download All GPKG + QML</a>
+    </div>
+
+
     <body>
         <div id="map">
         </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+        <script src="https://unpkg.com/tokml/tokml.js"></script>
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
@@ -99,6 +116,165 @@
         <script src="data/type_transportation_57.js"></script>
         <script src="data/traffic_58.js"></script>
         <script>
+
+        var categories = {
+            "transport": [
+                "traffic",
+                "type_transportation",
+                "type_train_station",
+                "mum_ws_polygon_grass",
+                "mum_ws_polygon_transport_taxi",
+                "mum_ws_polygon_transport_bus_station",
+                "mum_ws_polygon_transport_apron",
+                "mum_ws_polygon_transport_airport"
+            ],
+            "commercial": [
+                "mum_ws_polygon_buildings_retail",
+                "mum_ws_polygon_landmark_hotel",
+                "mum_ws_polygon_landmark_market_place",
+                "mum_ws_polygon_landmark_mall",
+                "mum_ws_polygon_landmark_cinema"
+            ],
+            "recreation": [
+                "mum_ws_polygon_landmark_theatre",
+                "mum_ws_polygon_landmark_arts_centre",
+                "mum_ws_polygon_landmark_community_centre",
+                "mum_ws_polygon_landmark_swimming_pool",
+                "mum_ws_polygon_landmark_pitch",
+                "mum_ws_polygon_landmark_playground",
+                "mum_ws_polygon_landmark_track",
+                "mum_ws_polygon_landmark_stadium",
+                "mum_ws_polygon_landmark_sports_centre"
+            ],
+            "water": [
+                "mum_ws_polygon_water_wetland",
+                "mum_ws_polygon_water_water",
+                "mum_ws_polygon_water_riverbank",
+                "mum_ws_polygon_water_reservoir"
+            ],
+            "landuse": [
+                "mum_ws_polygon_landuse_orchard",
+                "mum_ws_polygon_landuse_meadow",
+                "mum_ws_polygon_landuse_recreation_ground",
+                "mum_ws_polygon_landuse_park",
+                "mum_ws_polygon_landuse_scrub",
+                "mum_ws_polygon_landuse_residential",
+                "mum_ws_polygon_landuse_forest",
+                "mum_ws_polygon_landuse_retail",
+                "mum_ws_polygon_landuse_commercial",
+                "mum_ws_polygon_landuse_cemetery",
+                "mum_ws_polygon_landuse_quarry",
+                "mum_ws_polygon_landuse_military",
+                "mum_ws_polygon_landuse_industrial",
+                "mum_ws_polygon_landuse_farmyard",
+                "mum_ws_polygon_landuse_heath",
+                "mum_ws_polygon_landuse_farmland",
+                "mum_ws_polygon_landuse_nature_reserve"
+            ],
+            "public_service": [
+                "mum_ws_polygon_landmark_courthouse",
+                "mum_ws_polygon_landmark_post_office",
+                "mum_ws_polygon_landmark_wastewater_plant",
+                "mum_ws_polygon_landmark_fire_station",
+                "mum_ws_polygon_landmark_police",
+                "mum_ws_polygon_buildings_hospital",
+                "mum_ws_polygon_landmark_hospital"
+            ],
+            "education": [
+                "mum_ws_polygon_landmark_library",
+                "mum_ws_polygon_buildings_college",
+                "mum_ws_polygon_landmark_college",
+                "mum_ws_polygon_buildings_school",
+                "mum_ws_polygon_landmark_school",
+                "mum_ws_polygon_buildings_university",
+                "mum_ws_polygon_landmark_university"
+            ],
+            "base": [
+                "natural",
+                "places"
+            ]
+        };
+
+        // All map
+        categories["all_map"] = [].concat(...Object.values(categories));
+
+        // Fill dropdown
+        var catSel = document.getElementById('categorySelect');
+        Object.keys(categories).forEach(k => {
+        var opt = document.createElement('option');
+        opt.value = k;
+        opt.text = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        catSel.add(opt);
+        });
+
+        var statusDiv = document.getElementById('downloadStatus');
+
+        // Download function
+        async function downloadCategory(category, format) {
+        var layers = categories[category];
+        var zip = new JSZip();
+        var missing = [];
+
+        // Disable the download button during processing
+        var downloadBtn = document.getElementById('downloadBtn');
+        downloadBtn.disabled = true;
+        statusDiv.innerText = "Preparing download...";
+
+        for (let name of layers) {
+            statusDiv.innerText = "Processing: " + name;
+            var varName = "json_" + name;
+            var data = window[varName];
+
+            // Check if data exists and is valid
+            if (!data || !data.features || data.features.length === 0) {
+                missing.push(name);
+                continue;
+            }
+
+            if (format === 'geojson') {
+                zip.file(name + ".geojson", JSON.stringify(data));
+            } else {
+                try {
+                    var kml = tokml(data);
+                    zip.file(name + ".kml", kml);
+                } catch (e) {
+                    console.error("Failed to convert " + name + " to KML:", e);
+                    missing.push(name);
+                }
+            }
+            await new Promise(r => setTimeout(r, 10)); // Small delay to avoid UI freeze
+        }
+
+        if (missing.length) {
+            zip.file("README.txt", "The following layers could not be processed:\n" + missing.join("\n"));
+        }
+
+        statusDiv.innerText = "Compressing...";
+        var blob = await zip.generateAsync({ type: "blob" });
+
+        // Create download link
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${category}_${format}_${new Date().toISOString().slice(0, 10)}.zip`;
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            statusDiv.innerText = "Download ready";
+            downloadBtn.disabled = false;
+        }, 100);
+    }
+
+        // Bind
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+        var cat = document.getElementById('categorySelect').value;
+        var fmt = document.getElementById('formatSelect').value;
+        downloadCategory(cat, fmt);
+        });
+
         var highlightLayer;
         function highlightFeature(e) {
             highlightLayer = e.target;
