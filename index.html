@@ -3904,6 +3904,10 @@
                         <th scope="row">Name</th>\
                         <td class="visible-with-data" id="name">' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
+                    <tr>\
+                        <th scope="row">Type</th>\
+                        <td class="visible-with-data" id="type">' + (feature.properties['type'] !== null ? autolinker.link(String(feature.properties['type']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
                 </table>';
             
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
@@ -3918,24 +3922,12 @@
             return {
                 pane: 'pane_sv_road_59',
                 opacity: 1,
-                color: 'rgba(0,0,0,1.0)',
+                color: 'rgba(100, 100, 100, 1.0)',
                 dashArray: '',
                 lineCap: 'round',
                 lineJoin: 'round',
-                weight: 8.0,
-                fillOpacity: 0,
-                interactive: true,
-            }
-        }
-        function style_sv_road_59_1() {
-            return {
-                pane: 'pane_sv_road_59',
-                opacity: 1,
-                color: 'rgba(255,96,17,1.0)',
-                dashArray: '',
-                lineCap: 'round',
-                lineJoin: 'round',
-                weight: 6.0,
+                weight: 3.0,  // Thicker line for roads
+                fill: false,
                 fillOpacity: 0,
                 interactive: true,
             }
@@ -3945,17 +3937,16 @@
         map.createPane('pane_sv_road_59');
         map.getPane('pane_sv_road_59').style.zIndex = 459;  // Higher than existing layers
         map.getPane('pane_sv_road_59').style['mix-blend-mode'] = 'normal';
-        
 
         // Create the road layer
-        var layer_sv_road_59 = new L.geoJson.multiStyle(json_sv_road_59, {
+        var layer_sv_road_59 = new L.geoJson(json_sv_road_59, {
             attribution: '',
             interactive: true,
             dataVar: 'json_sv_road_59',
             layerName: 'layer_sv_road_59',
             pane: 'pane_sv_road_59',
             onEachFeature: pop_sv_road_59,
-            styles: [style_sv_road_59_0,style_sv_road_59_1,]
+            style: style_sv_road_59_0,
         });
 
         // Add to bounds group and map
