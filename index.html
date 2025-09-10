@@ -31,16 +31,23 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
             max-width: 300px;
         }
-        /* Style for fullscreen button */
-        .leaflet-control-fullscreen a {
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04IDNINWEyIDIgMCAwIDAtMiAydjNtMTggMlY1YTIgMiAwIDAgMC0yLTJoLTNtMCAxOGgzYTIgMiAwIDAgMCAyLTJ2LTNNMyAxNnYzYTIgMiAwIDAgMCAyIDJoMyI+PC9wYXRoPjwvc3ZnPg==');
-            background-size: 18px 18px;
+        .leaflet-control-zoom-fullscreen.fullscreen-icon {
+            width: 30px;             /* standard Leaflet button size */
+            height: 30px;
+            display: flex;           /* centers icon perfectly */
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;  /* matches Leaflet UI */
+            border-radius: 4px;      /* optional */
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 3H5a2 2 0 0 0-2 2v3m18-3v3a2 2 0 0 1-2 2h-3m-8 8H5a2 2 0 0 1-2-2v-3m18 3v-3a2 2 0 0 0-2-2h-3'/></svg>");
             background-repeat: no-repeat;
             background-position: center;
+            background-size: 18px 18px; /* keeps correct proportions */
         }
-        .leaflet-fullscreen-on .leaflet-control-fullscreen a {
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04IDN2M2EyIDIgMCAwIDEtMiAyaC0zbTAgMThoM2EyIDIgMCAwIDAgMi0ydi0zbTgtMXYzYTIgMiAwIDAgMS0yIDJoLTNtMC0xOGgzYTIgMiAwIDAgMSAyIDJ2MyI+PC9wYXRoPjwvc3ZnPg==');
+        .leaflet-fullscreen-on .leaflet-control-zoom-fullscreen.fullscreen-icon {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 9h-4v4m10-10h4v4m-4 6h4v4m-10 0H5v-4'/></svg>");
         }
+
         </style>
         <title></title>
     </head>
@@ -75,7 +82,6 @@
         <script src="js/leaflet-measure.js"></script>
         <script src="js/proj4.js"></script>
         <script src="js/proj4leaflet.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/2.4.0/Control.FullScreen.min.js"></script>
         <script src="data/places_0.js"></script>
         <script src="data/natural_1.js"></script>
         <script src="data/mum_ws_polygon_landmark_university_2.js"></script>
@@ -136,6 +142,7 @@
         <script src="data/type_transportation_57.js"></script>
         <script src="data/traffic_58.js"></script>
         <script src="data/sv_road_59.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/2.4.0/Control.FullScreen.min.js"></script>
         <script>
 
         var categories = {
@@ -423,6 +430,10 @@
         var crs = new L.Proj.CRS('EPSG:3857', '+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs', {
             resolutions: [2800, 1400, 700, 350, 175, 84, 42, 21, 11.2, 5.6, 2.8, 1.4, 0.7, 0.35, 0.14, 0.07],
         });
+        var bounds = [
+            [19.03, 72.80], // SW (approx)
+            [19.24, 72.88]  // NE (approx)
+        ];
         var map = L.map('map', {
             crs: crs,
             continuousWorld: false,
@@ -432,7 +443,7 @@
             fullscreenControlOptions: {
                 position: 'bottomright'
             }
-        }).fitBounds([[19.038175710479898,72.8106718329054],[19.047800600433057,72.82733155290549]]);
+        }).fitBounds(bounds);
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
