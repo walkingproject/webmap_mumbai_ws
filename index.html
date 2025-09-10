@@ -122,10 +122,12 @@
         <script src="data/type_train_station_56.js"></script>
         <script src="data/type_transportation_57.js"></script>
         <script src="data/traffic_58.js"></script>
+        <script src="data/sv_road_59.js"></script>
         <script>
 
         var categories = {
             "transport": [
+                "sv_road_59",
                 "traffic_58",
                 "type_transportation_57",
                 "type_train_station_56",
@@ -201,6 +203,7 @@
                 "places_0"
             ],
             "all_map": [
+                "sv_road_59",
                 "traffic_58",
                 "type_transportation_57",
                 "type_train_station_56",
@@ -3883,8 +3886,71 @@
         });
         bounds_group.addLayer(layer_traffic_58);
         map.addLayer(layer_traffic_58);
+        // Function to create popup for roads
+        function pop_sv_road_59(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Name</th>\
+                        <td class="visible-with-data" id="name">' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+            layer.on('popupopen', function(e) {
+                addClassToPopupIfMedia(content, e.popup);
+            });
+            layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        // Style function for roads
+        function style_sv_road_59_0() {
+            return {
+                pane: 'pane_sv_road_59',
+                opacity: 1,
+                color: 'rgba(100, 100, 100, 1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 3.0,  // Thicker line for roads
+                fill: false,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+
+        // Create a pane for roads
+        map.createPane('pane_sv_road_59');
+        map.getPane('pane_sv_road_59').style.zIndex = 459;  // Higher than existing layers
+        map.getPane('pane_sv_road_59').style['mix-blend-mode'] = 'normal';
+
+        // Create the road layer
+        var layer_sv_road_59 = new L.geoJson(json_sv_road_59, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_sv_road_59',
+            layerName: 'layer_sv_road_59',
+            pane: 'pane_sv_road_59',
+            onEachFeature: pop_sv_road_59,
+            style: style_sv_road_59_0,
+        });
+
+        // Add to bounds group and map
+        bounds_group.addLayer(layer_sv_road_59);
+        map.addLayer(layer_sv_road_59);
         var overlaysTree = [
         {label: '<b>transport</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: '<img src="legend/sv_road_59.png" /> sv_road', layer: layer_sv_road_59},
             {label: '<img src="legend/traffic_58.png" /> traffic', layer: layer_traffic_58},
             {label: '<img src="legend/type_transportation_57.png" /> type_transportation', layer: layer_type_transportation_57},
             {label: '<img src="legend/type_train_station_56.png" /> type_train_station', layer: layer_type_train_station_56},
