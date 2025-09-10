@@ -53,6 +53,7 @@
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
         <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
         <script src="js/leaflet.rotatedMarker.js"></script>
         <script src="js/leaflet.pattern.js"></script>
         <script src="js/leaflet-hash.js"></script>
@@ -3918,14 +3919,26 @@
             return {
                 pane: 'pane_sv_road_59',
                 opacity: 1,
-                color: 'rgba(100, 100, 100, 1.0)',
+                color: 'rgba(0,0,0,1.0)',
                 dashArray: '',
                 lineCap: 'round',
                 lineJoin: 'round',
-                weight: 3.0,  // Thicker line for roads
-                fill: false,
+                weight: 4.0,  // Thicker line for roads
                 fillOpacity: 0,
-                interactive: true,
+                interactive: false,
+            }
+        }
+        function style_sv_road_59_1() {
+            return {
+                pane: 'pane_sv_road_59',
+                opacity: 1,
+                color: 'rgba(255,96,17,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: false,
             }
         }
 
@@ -3935,14 +3948,14 @@
         map.getPane('pane_sv_road_59').style['mix-blend-mode'] = 'normal';
 
         // Create the road layer
-        var layer_sv_road_59 = new L.geoJson(json_sv_road_59, {
+        var layer_sv_road_59 = new L.geoJson.multiStyle(json_sv_road_59, {
             attribution: '',
             interactive: true,
             dataVar: 'json_sv_road_59',
             layerName: 'layer_sv_road_59',
             pane: 'pane_sv_road_59',
             onEachFeature: pop_sv_road_59,
-            style: style_sv_road_59_0,
+            styles: [style_sv_road_59_0,style_sv_road_59_1,]
         });
 
         // Add to bounds group and map
