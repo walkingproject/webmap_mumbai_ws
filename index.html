@@ -3904,10 +3904,6 @@
                         <th scope="row">Name</th>\
                         <td class="visible-with-data" id="name">' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
-                    <tr>\
-                        <th scope="row">Type</th>\
-                        <td class="visible-with-data" id="type">' + (feature.properties['type'] !== null ? autolinker.link(String(feature.properties['type']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
                 </table>';
             
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
