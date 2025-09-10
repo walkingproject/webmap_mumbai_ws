@@ -12,6 +12,7 @@
         <link rel="stylesheet" href="css/qgis2web.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
         <link rel="stylesheet" href="css/leaflet-measure.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/2.4.0/Control.FullScreen.css" />
         <style>
         html, body, #map {
             width: 100%;
@@ -29,6 +30,16 @@
             border-radius: 4px;
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
             max-width: 300px;
+        }
+        /* Style for fullscreen button */
+        .leaflet-control-fullscreen a {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04IDNINWEyIDIgMCAwIDAtMiAydjNtMTggMlY1YTIgMiAwIDAgMC0yLTJoLTNtMCAxOGgzYTIgMiAwIDAgMCAyLTJ2LTNNMyAxNnYzYTIgMiAwIDAgMCAyIDJoMyI+PC9wYXRoPjwvc3ZnPg==');
+            background-size: 18px 18px;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .leaflet-fullscreen-on .leaflet-control-fullscreen a {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04IDN2M2EyIDIgMCAwIDEtMiAyaC0zbTAgMThoM2EyIDIgMCAwIDAgMi0ydi0zbTgtMXYzYTIgMiAwIDAgMS0yIDJoLTNtMC0xOGgzYTIgMiAwIDAgMSAyIDJ2MyI+PC9wYXRoPjwvc3ZnPg==');
         }
         </style>
         <title></title>
@@ -64,6 +75,7 @@
         <script src="js/leaflet-measure.js"></script>
         <script src="js/proj4.js"></script>
         <script src="js/proj4leaflet.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/2.4.0/Control.FullScreen.min.js"></script>
         <script src="data/places_0.js"></script>
         <script src="data/natural_1.js"></script>
         <script src="data/mum_ws_polygon_landmark_university_2.js"></script>
@@ -415,7 +427,11 @@
             crs: crs,
             continuousWorld: false,
             worldCopyJump: false, 
-            zoomControl:false, maxZoom:20, minZoom:5
+            zoomControl:false, maxZoom:20, minZoom:5,
+            fullscreenControl: true,  // This enables the fullscreen control
+            fullscreenControlOptions: {
+                position: 'bottomright'
+            }
         }).fitBounds([[19.038175710479898,72.8106718329054],[19.047800600433057,72.82733155290549]]);
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
